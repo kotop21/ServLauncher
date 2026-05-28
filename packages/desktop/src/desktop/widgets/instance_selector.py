@@ -1,7 +1,11 @@
+import warnings
 import tkinter as tk
 import customtkinter as ctk
 from typing import Dict
 from ttkbootstrap_icons_lucide import LucideIcon
+from desktop.components import SmartMenuButton
+
+warnings.filterwarnings("ignore", category=UserWarning, module="customtkinter")
 
 
 class InstanceSelector(ctk.CTkScrollableFrame):
@@ -22,13 +26,22 @@ class InstanceSelector(ctk.CTkScrollableFrame):
         self.load_instances()
 
     def _build_context_menu(self):
-        self.context_menu.add_command(label="Manage server")
+        from desktop.windows import ServerWindow
+
+        self.cmd_manage = SmartMenuButton(
+            menu=self.context_menu,
+            label="Manage server",
+            master=self,
+            window_class=ServerWindow,
+            get_data=lambda: getattr(self, "_current_context_data", None),
+        )
+
         self.context_menu.add_separator()
         self.context_menu.add_command(label="Start", command=self._action_start)
         self.context_menu.add_command(label="Stop", command=self._action_stop)
         self.context_menu.add_separator()
         self.context_menu.add_command(label="Folder")
-        self.context_menu.add_command(label="Delete", foreground="red")
+        self.context_menu.add_command(label="Delete")
 
     def load_instances(self):
         data = self._get_mock_instances()
@@ -45,7 +58,9 @@ class InstanceSelector(ctk.CTkScrollableFrame):
         lbl_icon.grid(row=0, column=0, padx=(10, 5), pady=6)
 
         lbl_core = ctk.CTkLabel(
-            row_frame, text=f"{data['core']} {data['version']}", font=("", 14, "bold")
+            row_frame,
+            text=f"{data['name']} ({data['core']} {data['version']})",
+            font=("", 14, "bold"),
         )
         lbl_core.grid(row=0, column=1, padx=5, pady=6, sticky="w")
 
@@ -55,9 +70,7 @@ class InstanceSelector(ctk.CTkScrollableFrame):
         self.row_frames.append(row_frame)
 
         widgets = [row_frame, lbl_icon, lbl_core, lbl_port]
-        hint_text = (
-            f"{data['core']} {data['version']} | {data['port']} | {data['status']}"
-        )
+        hint_text = f"{data['name']} | {data['core']} {data['version']} | {data['port']} | {data['status']}"
 
         for w in widgets:
             w.bind(
@@ -65,9 +78,16 @@ class InstanceSelector(ctk.CTkScrollableFrame):
                 lambda e, r=row_index, txt=hint_text: self._on_single_click(r, txt),
             )
             w.bind("<Double-Button-1>", lambda e, d=data: self._on_double_click(d))
-            w.bind("<Button-3>", lambda e, d=data: self._show_context_menu(e, d))
+            w.bind(
+                "<Button-3>",
+                lambda e, d=data, r=row_index, txt=hint_text: self._show_context_menu(
+                    e, d, r, txt
+                ),
+            )
 
-    def _show_context_menu(self, event, data):
+    def _show_context_menu(self, event, data, row_index, text):
+        self._current_context_data = data
+        self._on_single_click(row_index, text)
         self.context_menu.entryconfigure(
             "Start", state="normal" if data["status"] != "Running" else "disabled"
         )
@@ -77,10 +97,16 @@ class InstanceSelector(ctk.CTkScrollableFrame):
         self.context_menu.post(event.x_root, event.y_root)
 
     def _action_start(self):
-        print("Start action triggered")
+        if hasattr(self, "_current_context_data"):
+            print(
+                f"[LOG] Start action triggered for {self._current_context_data['name']}"
+            )
 
     def _action_stop(self):
-        print("Stop action triggered")
+        if hasattr(self, "_current_context_data"):
+            print(
+                f"[LOG] Stop action triggered for {self._current_context_data['name']}"
+            )
 
     def _on_single_click(self, row_index, text):
         if self.status_bar:
@@ -91,12 +117,14 @@ class InstanceSelector(ctk.CTkScrollableFrame):
             )
 
     def _on_double_click(self, data):
-        print(f"[CHAT] Double click! Connecting to port {data['port']}...")
+        self._current_context_data = data
+        self.cmd_manage._on_click()
 
     def _get_mock_instances(self):
         return [
             {
                 "id": 1,
+                "name": "Main Survival",
                 "core": "Paper",
                 "version": "1.20.4",
                 "status": "Running",
@@ -104,6 +132,7 @@ class InstanceSelector(ctk.CTkScrollableFrame):
             },
             {
                 "id": 2,
+                "name": "Lobby",
                 "core": "Purpur",
                 "version": "1.19.4",
                 "status": "Stopped",
@@ -111,6 +140,7 @@ class InstanceSelector(ctk.CTkScrollableFrame):
             },
             {
                 "id": 3,
+                "name": "Minigames",
                 "core": "Spigot",
                 "version": "1.8.8",
                 "status": "Waiting",
@@ -118,6 +148,7 @@ class InstanceSelector(ctk.CTkScrollableFrame):
             },
             {
                 "id": 4,
+                "name": "Anarchy",
                 "core": "Folia",
                 "version": "1.20.4",
                 "status": "Stopped",

@@ -4,21 +4,23 @@ from desktop.components import BaseWindow
 
 class AddServerWindow(BaseWindow):
     def __init__(self, parent):
-        super().__init__(parent, title="Add Server", size=(400, 400))
+        super().__init__(parent, title="Add Server", size=(400, 300))
 
         self.container = ctk.CTkFrame(self, fg_color="transparent")
         self.container.pack(expand=True, fill="both", padx=40, pady=40)
-
-        self.lbl_title = ctk.CTkLabel(
-            self.container, text="Add New Server", font=("", 20, "bold")
-        )
-        self.lbl_title.pack(pady=(0, 20))
 
         self.entry_name = ctk.CTkEntry(self.container, placeholder_text="Server Name")
         self.entry_name.pack(fill="x", pady=10)
 
         self.option_core = ctk.CTkOptionMenu(
-            self.container, values=["Paper", "Purpur", "Spigot", "Folia"]
+            self.container,
+            values=[
+                "Paper",
+                "Purpur (Paper fork)",
+                "Pufferfish (Paper fork)",
+                "Velocity",
+                "Folia",
+            ],
         )
         self.option_core.pack(fill="x", pady=10)
 

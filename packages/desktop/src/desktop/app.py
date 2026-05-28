@@ -1,4 +1,5 @@
 from desktop.windows import MainWindow
+import core.listeners
 
 
 def main():
