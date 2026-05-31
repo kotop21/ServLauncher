@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="ServLauncher">
+<Layout title="Home">
   <main class="container">
     
     <div class="main-content">
@@ -21,16 +21,19 @@ import Layout from '../layouts/Layout.astro';
 
     <ul>
       <li>
-        <strong>Молниеносный запуск</strong> — Старт инстансов за доли секунды без тяжелого оверхеда.
+        <strong>Lightning-Fast Interface</strong> — The control panel opens instantly and runs with zero lag, keeping the system lightweight and responsive.
       </li>
       <li>
-        <strong>Модульная архитектура</strong> — Изолированные модули для плагинов, конфигов и логов.
+        <strong>Centralized Management</strong> — All your servers are gathered in one place. Switch between consoles, files, and instance logs in a single click.
       </li>
       <li>
-        <strong>Живой мониторинг</strong> — Отслеживание ресурсов процессора и памяти в реальном времени.
+        <strong>Built-in Editor</strong> — Modify configurations and tweak server files directly inside the launcher without relying on third-party text editors.
       </li>
       <li>
-        <strong>Полный контроль</strong> — Удобное управление консолью, авто-бэкапы и быстрая смена ядер.
+        <strong>Instant Core Switching</strong> — Automatically download popular server jars (Paper, Purpur) straight from the dashboard or instantly drop in your own local .jar.
+      </li>
+      <li>
+        <strong>Monorepo Ready</strong> — Perfectly tailored for local development and testing entire networks of multiple servers simultaneously.
       </li>
     </ul>
 
@@ -45,6 +48,11 @@ import Layout from '../layouts/Layout.astro';
   hr {
     margin-top: 30px;
     margin-bottom: 30px;
+  }
+
+  li {
+    margin-top: 5px;
+    margin-bottom: 5px;
   }
 
   footer {
@@ -104,6 +112,7 @@ import Layout from '../layouts/Layout.astro';
   .container {
     max-width: 46%;
     padding-top: 15vh;
+    margin: 0 auto;
   }
 
   img {
@@ -113,5 +122,46 @@ import Layout from '../layouts/Layout.astro';
     filter: 
       drop-shadow(0 20px 50px rgba(255, 255, 255, 0.08))
       drop-shadow(0 -15px 40px rgba(255, 255, 255, 0.05));
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      max-width: 100%;
+      padding: 40px 20px 20px 20px;
+    }
+
+    .general-title {
+      font-size: 36px;
+      letter-spacing: -1px;
+    }
+
+    .title {
+      font-size: 28px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      padding: 8px 0;
+    }
+
+    .hero-buttons {
+      width: 100%;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .hero-buttons a, 
+    .hero-buttons button {
+      width: 100%;
+    }
+
+    .hero-buttons button {
+      padding: 14px 24px;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
   }
 </style>
