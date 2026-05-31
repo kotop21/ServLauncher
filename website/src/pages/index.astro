@@ -11,11 +11,11 @@ import Layout from '../layouts/Layout.astro';
 
       <div class="hero-buttons">
         <a href="#"><button>Download</button></a>
-        <a href="https://github.com/kotop21/ServLauncher"><button>GitHub</button></a>
+        <a href="https://github.com/kotop21/AstraLauncher"><button>GitHub</button></a>
       </div>
     </div>
 
-    <img src={`${import.meta.env.BASE_URL}preview.png`} alt="Astra Launcher Preview" loading="eager" />
+    <img src={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/preview.png`} alt="Astra Launcher Preview" loading="eager" />
 
     <h1 class="title">Features</h1>
 
