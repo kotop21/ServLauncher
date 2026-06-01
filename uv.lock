@@ -35,7 +35,7 @@ wheels = [
 
 [[package]]
 name = "core"
-version = "0.0.1"
+version = "0.0.2"
 source = { editable = "packages/core" }
 dependencies = [
     { name = "certifi" },
@@ -68,7 +68,7 @@ wheels = [
 
 [[package]]
 name = "desktop"
-version = "0.0.1"
+version = "0.0.2"
 source = { editable = "packages/desktop" }
 dependencies = [
     { name = "core" },

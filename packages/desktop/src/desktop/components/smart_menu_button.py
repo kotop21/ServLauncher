@@ -48,7 +48,7 @@ class SmartMenuButton:
                 self.opened_windows[window_key] = self.window_class(parent=main_app)
 
             self.opened_windows[window_key].focus()
-            print(f"[LOG] Opened window: {self.window_class.__name__}")
+            print(f"[Desktop] Opened window: {self.window_class.__name__}")
         else:
             self.opened_windows[window_key].focus()
-            print(f"[LOG] Focused existing window: {self.window_class.__name__}")
+            print(f"[Desktop] Focused existing window: {self.window_class.__name__}")

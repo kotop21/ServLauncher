@@ -11,7 +11,7 @@ class UserFileManager:
                     return True, f.read()
             return False, ""
         except Exception as e:
-            print(f"File read error: {e}")
+            print(f"[Core-util] File read error: {e}")
             return False, ""
 
     @staticmethod
@@ -22,5 +22,5 @@ class UserFileManager:
                 f.write(content)
             return True
         except Exception as e:
-            print(f"File save error: {e}")
+            print(f"[Core-util] File save error: {e}")
             return False

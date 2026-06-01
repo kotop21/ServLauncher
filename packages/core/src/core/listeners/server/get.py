@@ -15,3 +15,8 @@ class GetServersListener(BaseListener):
         data = state.get_server(server_id)
         if data:
             bus.emit(Signal.RESPONSE_SERVER, data=data)
+
+    @listen_to(Signal.CMD_CHECK_ACTIVE_SERVERS)
+    def handle_check_active_servers(self):
+        has_active = len(state.active_processes) > 0
+        bus.emit(Signal.RESPONSE_ACTIVE_SERVERS_STATUS, has_active=has_active)

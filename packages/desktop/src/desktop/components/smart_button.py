@@ -34,8 +34,17 @@ class SmartButton(ctk.CTkButton):
         if self.window_instance is None or not self.window_instance.winfo_exists():
             main_app = self.winfo_toplevel()
             self.window_instance = self.window_class(parent=main_app)
+            self.window_instance.attributes("-topmost", True)
+            self.window_instance.after(
+                100, lambda: self.window_instance.attributes("-topmost", False)
+            )
+
             self.window_instance.focus()
-            print(f"Opened window: {self.window_class.__name__}")
+            print(f"[Desktop] Opened window: {self.window_class.__name__}")
         else:
+            self.window_instance.attributes("-topmost", True)
+            self.window_instance.after(
+                100, lambda: self.window_instance.attributes("-topmost", False)
+            )
             self.window_instance.focus()
-            print(f"Focused existing window: {self.window_class.__name__}")
+            print(f"[Desktop] Focused existing window: {self.window_class.__name__}")

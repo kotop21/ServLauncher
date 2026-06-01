@@ -13,4 +13,5 @@ def run_jar(jar_path: str, java_args: str, cwd: str) -> subprocess.Popen:
         text=True,
         bufsize=1,
     )
+    print(f"[Core-util] Run jar {jar_path} {java_args}")
     return process

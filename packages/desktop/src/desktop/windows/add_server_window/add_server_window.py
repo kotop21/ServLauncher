@@ -1,177 +1,116 @@
-import tkinter.messagebox as messagebox
+import tkinter as tk
 import customtkinter as ctk
-from typing import List
 from desktop.components import BaseWindow
-from core.events import bus, Signal
+from .add_server_actions import AddServerActions
 
 
 class AddServerWindow(BaseWindow):
     def __init__(self, parent):
-        super().__init__(parent, title="Add Server", size=(400, 350))
+        super().__init__(parent, title="Add Server", size=(500, 500))
 
+        self._setup_ui()
+
+        self.actions = AddServerActions(self)
+        self.bind("<Destroy>", self.actions.on_destroy)
+
+    def _get_theme_color(self, widget_type, property_name):
+        color = ctk.ThemeManager.theme[widget_type][property_name]
+        return self._apply_appearance_mode(color)
+
+    def _create_listbox(self, parent):
+        bg_color = self._get_theme_color("CTkFrame", "fg_color")
+        text_color = self._get_theme_color("CTkLabel", "text_color")
+        sel_bg = self._get_theme_color("CTkButton", "fg_color")
+
+        container = ctk.CTkFrame(parent, fg_color="transparent")
+
+        lb = tk.Listbox(
+            container,
+            bg=bg_color,
+            fg=text_color,
+            selectbackground=sel_bg,
+            selectforeground="white",
+            font=("TkDefaultFont", 13),
+            borderwidth=0,
+            highlightthickness=0,
+            activestyle="none",
+            exportselection=False,
+        )
+
+        scrollbar = ctk.CTkScrollbar(container, command=lb.yview)
+        lb.configure(yscrollcommand=scrollbar.set)
+
+        scrollbar.pack(side="right", fill="y")
+        lb.pack(side="left", expand=True, fill="both")
+
+        return container, lb
+
+    def _setup_ui(self):
         self.container = ctk.CTkFrame(self, fg_color="transparent")
-        self.container.pack(expand=True, fill="both", padx=40, pady=40)
+        self.container.pack(expand=True, fill="both", padx=20, pady=20)
 
-        self.entry_name = ctk.CTkEntry(self.container, placeholder_text="Server Name")
-        self.entry_name.pack(fill="x", pady=10)
+        self.lbl_name = ctk.CTkLabel(self.container, text="Server Name:")
+        self.lbl_name.pack(anchor="w")
+        self.entry_name = ctk.CTkEntry(
+            self.container, placeholder_text="My Awesome Server"
+        )
+        self.entry_name.pack(fill="x", pady=(0, 10))
 
+        self.lbl_core = ctk.CTkLabel(self.container, text="Server Core (Engine):")
+        self.lbl_core.pack(anchor="w")
         self.option_core = ctk.CTkOptionMenu(
             self.container,
             values=["Paper", "Purpur", "Import Local"],
-            command=self._on_core_selected,
         )
-        self.option_core.pack(fill="x", pady=10)
+        self.option_core.pack(fill="x", pady=(0, 10))
 
-        self.option_version = ctk.CTkOptionMenu(
-            self.container,
-            values=["Select Core First..."],
-            state="disabled",
-            command=self._on_version_selected,
-        )
-        self.option_version.pack(fill="x", pady=10)
+        self.lists_frame = ctk.CTkFrame(self.container, fg_color="transparent")
+        self.lists_frame.pack(expand=True, fill="both", pady=(0, 10))
 
-        self.option_build = ctk.CTkOptionMenu(
-            self.container, values=["Select Version First..."], state="disabled"
+        self.version_container = ctk.CTkFrame(self.lists_frame, fg_color="transparent")
+        self.version_container.pack(side="left", expand=True, fill="both", padx=(0, 5))
+
+        self.lbl_version = ctk.CTkLabel(
+            self.version_container, text="Minecraft Version:"
         )
-        self.option_build.pack(fill="x", pady=10)
+        self.lbl_version.pack(anchor="w")
+
+        self.entry_search_version = ctk.CTkEntry(
+            self.version_container, placeholder_text="Search version..."
+        )
+        self.entry_search_version.pack(fill="x", pady=(0, 5))
+
+        self.v_list_container, self.version_listbox = self._create_listbox(
+            self.version_container
+        )
+        self.v_list_container.pack(expand=True, fill="both")
+
+        self.build_container = ctk.CTkFrame(self.lists_frame, fg_color="transparent")
+        self.build_container.pack(side="left", expand=True, fill="both", padx=(5, 0))
+
+        self.lbl_build = ctk.CTkLabel(self.build_container, text="Core Build:")
+        self.lbl_build.pack(anchor="w")
+
+        self.entry_search_build = ctk.CTkEntry(
+            self.build_container, placeholder_text="Search build..."
+        )
+        self.entry_search_build.pack(fill="x", pady=(0, 5))
+
+        self.b_list_container, self.build_listbox = self._create_listbox(
+            self.build_container
+        )
+        self.b_list_container.pack(expand=True, fill="both")
 
         self.btn_frame = ctk.CTkFrame(self.container, fg_color="transparent")
-        self.btn_frame.pack(fill="x", pady=(20, 0))
+        self.btn_frame.pack(fill="x", side="bottom", pady=(10, 0))
 
         self.btn_cancel = ctk.CTkButton(
             self.btn_frame,
             text="Cancel",
             fg_color="transparent",
             border_width=1,
-            command=self.destroy,
         )
         self.btn_cancel.pack(side="left", fill="x", expand=True, padx=(0, 5))
 
-        self.btn_confirm = ctk.CTkButton(
-            self.btn_frame, text="Confirm", command=self._on_confirm
-        )
+        self.btn_confirm = ctk.CTkButton(self.btn_frame, text="Confirm")
         self.btn_confirm.pack(side="left", fill="x", expand=True, padx=(5, 0))
-
-        bus.subscribe(Signal.RESPONSE_MC_VERSIONS, self._on_versions_received)
-        bus.subscribe(Signal.RESPONSE_BUILD_VERSIONS, self._on_builds_received)
-        bus.subscribe(Signal.RESPONSE_DIR_DIALOG, self._on_dir_selected)
-        bus.subscribe(Signal.RESPONSE_SERVER_SCANNED, self._on_scanned)
-
-        self.bind("<Destroy>", self._cleanup)
-
-        self._on_core_selected(self.option_core.get())
-
-    def _cleanup(self, event):
-        if str(event.widget) == str(self):
-            try:
-                bus.unsubscribe(Signal.RESPONSE_MC_VERSIONS, self._on_versions_received)
-                bus.unsubscribe(
-                    Signal.RESPONSE_BUILD_VERSIONS, self._on_builds_received
-                )
-                bus.unsubscribe(Signal.RESPONSE_DIR_DIALOG, self._on_dir_selected)
-                bus.unsubscribe(Signal.RESPONSE_SERVER_SCANNED, self._on_scanned)
-            except ValueError:
-                pass
-
-    def _on_core_selected(self, core_name: str):
-        if core_name == "Import Local":
-            self.option_version.configure(state="disabled", values=["N/A (Import)"])
-            self.option_version.set("N/A (Import)")
-            self.option_build.configure(state="disabled", values=["N/A (Import)"])
-            self.option_build.set("N/A (Import)")
-            self.btn_confirm.configure(text="Select Folder")
-            return
-
-        self.btn_confirm.configure(text="Confirm")
-        self.option_version.configure(state="disabled", values=["Loading..."])
-        self.option_version.set("Loading...")
-        self.option_build.configure(state="disabled", values=["Waiting..."])
-        self.option_build.set("Waiting...")
-
-        bus.emit(Signal.CMD_FETCH_MC_VERSIONS, core_name=core_name)
-
-    def _on_versions_received(self, core_name: str, versions: List[str]):
-        if self.option_core.get() == core_name:
-            self.option_version.configure(state="normal", values=versions)
-            if versions:
-                self.option_version.set(versions[0])
-                self._on_version_selected(versions[0])
-
-    def _on_version_selected(self, mc_version: str):
-        if self.option_core.get() == "Import Local":
-            return
-
-        self.option_build.configure(state="disabled", values=["Loading..."])
-        self.option_build.set("Loading...")
-        core_name = self.option_core.get()
-
-        bus.emit(
-            Signal.CMD_FETCH_BUILD_VERSIONS, core_name=core_name, mc_version=mc_version
-        )
-
-    def _on_builds_received(self, core_name: str, mc_version: str, builds: List[str]):
-        if (
-            self.option_core.get() == core_name
-            and self.option_version.get() == mc_version
-        ):
-            self.option_build.configure(state="normal", values=builds)
-            if builds:
-                self.option_build.set(builds[0])
-
-    def _on_confirm(self):
-        name = self.entry_name.get().strip()
-        if not name:
-            messagebox.showerror("Error", "Server Name is required!")
-            return
-
-        core = self.option_core.get()
-        if core == "Import Local":
-            bus.emit(Signal.CMD_OPEN_DIR_DIALOG, title="Select Server Folder")
-            return
-
-        version = self.option_version.get()
-        build = self.option_build.get()
-
-        agree = messagebox.askyesno(
-            "Minecraft EULA",
-            "By installing this server, you must agree to the Minecraft EULA.\n\n"
-            "Read it here: https://aka.ms/MinecraftEULA\n\n"
-            "Do you agree to the EULA?",
-        )
-
-        if not agree:
-            return
-
-        server_data = {
-            "name": name,
-            "core": core,
-            "version": version,
-            "build": build,
-            "port": 25565,
-            "path": "",
-        }
-
-        bus.emit(Signal.CMD_ADD_SERVER, server_data=server_data)
-        self.destroy()
-
-    def _on_dir_selected(self, path: str):
-        if not path:
-            return
-        bus.emit(Signal.CMD_SCAN_SERVER_DIR, path=path)
-
-    def _on_scanned(self, server_data: dict):
-        if server_data["core"] == "Unknown" and server_data["version"] == "Unknown":
-            messagebox.showerror(
-                "Invalid Directory",
-                "This directory does not appear to be a valid Minecraft server.\nCould not find server .jar or configuration files.",
-            )
-            return
-
-        custom_name = self.entry_name.get().strip()
-        if custom_name:
-            server_data["name"] = custom_name
-
-        server_data["is_imported"] = True
-
-        bus.emit(Signal.CMD_ADD_SERVER, server_data=server_data)
-        self.destroy()

@@ -60,4 +60,4 @@ class ExplorerListener(BaseListener):
                 mtime=current_mtime,
             )
         except Exception as e:
-            print(f"[Core] Error reading directory {path}: {e}")
+            print(f"[Core-listener] Error reading directory {path}: {e}")

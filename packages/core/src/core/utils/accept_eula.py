@@ -8,4 +8,4 @@ def accept_eula(server_path: str):
             "#By changing the setting below to TRUE you are indicating your agreement to our EULA (https://aka.ms/MinecraftEULA).\n"
         )
         f.write("eula=true\n")
-    print(f"[Core] EULA automatically accepted in {eula_path}")
+    print(f"[Core-util] EULA automatically accepted in {eula_path}")

@@ -18,7 +18,9 @@ class ConsoleListener(BaseListener):
                     Signal.SERVER_CONSOLE_OUTPUT, server_id=server_id, line=echo_line
                 )
             except Exception as e:
-                print(f"[Core] Failed to send command to server {server_id}: {e}")
+                print(
+                    f"[Core-listener] Failed to send command to server {server_id}: {e}"
+                )
 
     @listen_to(Signal.CMD_REQUEST_CONSOLE_HISTORY)
     def handle_request_history(self, server_id: int):

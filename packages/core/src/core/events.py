@@ -25,6 +25,7 @@ class Signal(Enum):
     CMD_SCAN_SERVER_DIR = auto()
     CMD_REMOVE_SERVER = auto()
     CMD_CANCEL_DOWNLOAD = auto()
+    CMD_CHECK_ACTIVE_SERVERS = auto()
 
     EVENT_DOWNLOAD_PROGRESS = auto()
     EVENT_DOWNLOAD_COMPLETE = auto()
@@ -45,6 +46,7 @@ class Signal(Enum):
     RESPONSE_FILE_SAVED = auto()
     RESPONSE_SERVER_SCANNED = auto()
     RESPONSE_DIR_DIALOG = auto()
+    RESPONSE_ACTIVE_SERVERS_STATUS = auto()
 
     EVENT_DOWNLOAD_STARTED = auto()
 

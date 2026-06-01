@@ -15,7 +15,9 @@ class StartServerListener(BaseListener):
 
         existing_process = state.get_process(server_id)
         if existing_process and existing_process.poll() is None:
-            print(f"[Core] Server {server_id} is already running in background!")
+            print(
+                f"[Core-listener] Server {server_id} is already running in background!"
+            )
             return
 
         server_dir = Path(server["path"])
@@ -25,7 +27,7 @@ class StartServerListener(BaseListener):
             possible_jars = list(server_dir.glob("*.jar"))
             if not possible_jars:
                 print(
-                    f"[Core] Error: No .jar files found for server {server_id} in {server_dir}"
+                    f"[Core-listener] Error: No .jar files found for server {server_id} in {server_dir}"
                 )
                 return
 
@@ -47,7 +49,7 @@ class StartServerListener(BaseListener):
                     except OSError:
                         pass
         except Exception as e:
-            print(f"[Core] Error cleaning lock files: {e}")
+            print(f"[Core-listener] Error cleaning lock files: {e}")
 
         process = run_jar(str(jar_path), server.get("java_args", ""), str(server_dir))
         state.set_process(server_id, process)

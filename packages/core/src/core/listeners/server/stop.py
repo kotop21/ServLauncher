@@ -19,7 +19,9 @@ class StopServerListener(BaseListener):
                         line="> stop (sent by launcher)",
                     )
             except Exception as e:
-                print(f"[Core] Failed to send stop command to server {server_id}: {e}")
+                print(
+                    f"[Core-listener] Failed to send stop command to server {server_id}: {e}"
+                )
                 process.terminate()
 
     @listen_to(Signal.CMD_SHUTDOWN_ALL)
@@ -40,4 +42,4 @@ class StopServerListener(BaseListener):
 
             state.remove_process(server_id)
             state.update_server_status(server_id, "Stopped")
-        print("[Core] All active servers have been shut down.")
+        print("[Core-listener] All active servers have been shut down.")
