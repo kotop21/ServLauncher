@@ -1,5 +1,7 @@
 import customtkinter as ctk
 from desktop.widgets import StatusBar, MenuBar, InstanceSelector
+from desktop.version import __version__ as desktop_version
+from core.version import __version__ as core_version
 
 
 class MainWindow(ctk.CTk):
@@ -7,7 +9,11 @@ class MainWindow(ctk.CTk):
         super().__init__()
         self.geometry("800x600")
         self.minsize(350, 200)
-        self.title("Astra Launcher")
+
+        if "dev" in desktop_version or "dev" in core_version:
+            self.title("AstraLauncher (develop)")
+        else:
+            self.title(f"Astra Launcher v{desktop_version} (Core v{core_version})")
 
         self.status_bar = StatusBar(self)
         self.status_bar.pack(side="bottom", fill="x")

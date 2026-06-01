@@ -16,7 +16,7 @@ source = { virtual = "." }
 
 [[package]]
 name = "core"
-version = "0.1.0"
+version = "0.0.1"
 source = { editable = "packages/core" }
 
 [[package]]
@@ -43,7 +43,7 @@ wheels = [
 
 [[package]]
 name = "desktop"
-version = "0.1.0"
+version = "0.0.1"
 source = { editable = "packages/desktop" }
 dependencies = [
     { name = "core" },
