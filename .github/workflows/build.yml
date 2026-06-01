@@ -24,15 +24,59 @@ jobs:
         with:
           python-version: '3.13'
 
-      - run: uv sync
+      - run: uv sync --all-packages
 
       - run: uv pip install pyinstaller
 
       - run: uv run python .github/scripts/freeze_versions.py
 
-      - run: uv run pyinstaller --noconfirm --onefile --windowed --name AstraLauncher-${{ runner.os }} --exclude-module PyQt5 --exclude-module PyQt6 --exclude-module PySide6 --exclude-module numpy --exclude-module pandas --exclude-module matplotlib --exclude-module pytest --hidden-import customtkinter --collect-all customtkinter --hidden-import ttkbootstrap_icons --collect-all ttkbootstrap_icons --hidden-import ttkbootstrap_icons_lucide --collect-all ttkbootstrap_icons_lucide --paths packages/core/src --paths packages/desktop/src packages/desktop/src/desktop/app.py
+      - name: Get Build Identifier
+        shell: bash
+        run: |
+          VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('packages/desktop/pyproject.toml', 'rb'))['project']['version'])")
+          SHA=$(git rev-parse --short HEAD)
+          echo "BUILD_ID=${VERSION}-${SHA}" >> $GITHUB_ENV
+
+      - run: uv run pyinstaller --noconfirm --onedir --windowed --optimize 2 --name AstraLauncher-${{ runner.os }} --exclude-module PyQt5 --exclude-module PyQt6 --exclude-module PySide6 --exclude-module numpy --exclude-module pandas --exclude-module matplotlib --exclude-module pytest --hidden-import customtkinter --collect-all customtkinter --hidden-import ttkbootstrap_icons --collect-all ttkbootstrap_icons --hidden-import ttkbootstrap_icons_lucide --collect-all ttkbootstrap_icons_lucide --paths packages/core/src --paths packages/desktop/src packages/desktop/src/desktop/app.py
 
       - uses: actions/upload-artifact@v4
         with:
-          name: AstraLauncher-${{ runner.os }}
+          name: AstraLauncher-DEV-${{ runner.os }}-${{ env.BUILD_ID }}
           path: dist/AstraLauncher-${{ runner.os }}*
+
+      - if: matrix.os == 'macos-latest'
+        run: |
+          brew install create-dmg
+          create-dmg --volname "Astra Launcher" --window-pos 200 120 --window-size 600 400 --icon-size 100 --icon "AstraLauncher-${{ runner.os }}.app" 175 120 --hide-extension "AstraLauncher-${{ runner.os }}.app" --app-drop-link 425 120 "AstraLauncher-RELEASE-macOS-${{ env.BUILD_ID }}.dmg" "dist/AstraLauncher-${{ runner.os }}.app"
+
+      - if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          @"
+          [Setup]
+          AppName=Astra Launcher
+          AppVersion=${env:BUILD_ID}
+          DefaultDirName={autopf}\AstraLauncher
+          OutputDir=.
+          OutputBaseFilename=AstraLauncher-RELEASE-Windows-${env:BUILD_ID}
+          Compression=lzma
+          SolidCompression=yes
+          [Files]
+          Source: "dist\AstraLauncher-Windows\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+          [Icons]
+          Name: "{autoprograms}\Astra Launcher"; Filename: "{app}\AstraLauncher-Windows.exe"
+          Name: "{autodesktop}\Astra Launcher"; Filename: "{app}\AstraLauncher-Windows.exe"
+          "@ > setup.iss
+          iscc setup.iss
+
+      - if: matrix.os == 'ubuntu-latest'
+        run: |
+          tar -czvf AstraLauncher-RELEASE-Linux-${{ env.BUILD_ID }}.tar.gz -C dist AstraLauncher-Linux
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AstraLauncher-RELEASE-INSTALLERS-${{ runner.os }}-${{ env.BUILD_ID }}
+          path: |
+            *.dmg
+            *RELEASE*.exe
+            *.tar.gz
