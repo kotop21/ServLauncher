@@ -30,7 +30,7 @@ jobs:
 
       - run: uv run python .github/scripts/freeze_versions.py
 
-      - run: uv run pyinstaller --noconfirm --onefile --windowed --name AstraLauncher-${{ runner.os }} --exclude-module PyQt5 --exclude-module PyQt6 --exclude-module PySide6 --exclude-module numpy --exclude-module pandas --exclude-module matplotlib --exclude-module pytest --collect-all customtkinter --collect-all ttkbootstrap_icons --collect-all ttkbootstrap_icons_lucide --paths packages/core/src --paths packages/desktop/src packages/desktop/src/desktop/app.py
+      - run: uv run pyinstaller --noconfirm --onefile --windowed --name AstraLauncher-${{ runner.os }} --exclude-module PyQt5 --exclude-module PyQt6 --exclude-module PySide6 --exclude-module numpy --exclude-module pandas --exclude-module matplotlib --exclude-module pytest --hidden-import customtkinter --collect-all customtkinter --hidden-import ttkbootstrap_icons --collect-all ttkbootstrap_icons --hidden-import ttkbootstrap_icons_lucide --collect-all ttkbootstrap_icons_lucide --paths packages/core/src --paths packages/desktop/src packages/desktop/src/desktop/app.py
 
       - uses: actions/upload-artifact@v4
         with:
