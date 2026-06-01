@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+
   pull_request:
     branches:
       - main
@@ -38,6 +39,7 @@ jobs:
           echo "BUILD_ID=${VERSION}" >> $GITHUB_ENV
 
       - name: Build app
+        shell: bash
         run: |
           uv run pyinstaller \
             --noconfirm \
