@@ -24,54 +24,76 @@ jobs:
       - run: uv pip install pyinstaller
       - run: uv run python .github/scripts/freeze_versions.py
 
-      - name: Build
-        shell: bash
-        run: |
-          FLAGS="--noconfirm --windowed --optimize 2 --exclude-module PyQt5 --exclude-module PyQt6 --exclude-module PySide6 --exclude-module numpy --exclude-module pandas --exclude-module matplotlib --exclude-module pytest --hidden-import customtkinter --collect-all customtkinter --hidden-import ttkbootstrap_icons --collect-all ttkbootstrap_icons --hidden-import ttkbootstrap_icons_lucide --collect-all ttkbootstrap_icons_lucide --paths packages/core/src --paths packages/desktop/src packages/desktop/src/desktop/app.py"
-          
-          if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            uv run pyinstaller $FLAGS --onefile --name AstraLauncher-DEV-Windows
-            uv run pyinstaller $FLAGS --onedir --name AstraLauncher-RELEASE-Windows
-          else
-            uv run pyinstaller $FLAGS --onedir --name AstraLauncher-RELEASE-${{ runner.os }}
-          fi
-
-      - name: Create Installers
+      - name: Get Build Identifier
         shell: bash
         run: |
           VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('packages/desktop/pyproject.toml', 'rb'))['project']['version'])")
-          
-          if [ "${{ matrix.os }}" == "macos-latest" ]; then
-            brew install create-dmg
-            create-dmg --volname "Astra Launcher" --window-pos 200 120 --window-size 600 400 --icon-size 100 --icon "AstraLauncher-RELEASE-macos-latest.app" 175 120 --hide-extension "AstraLauncher-RELEASE-macos-latest.app" --app-drop-link 425 120 "AstraLauncher-RELEASE-macOS-${VERSION}.dmg" "dist/AstraLauncher-RELEASE-macos-latest.app"
-          
-          elif [ "${{ matrix.os }}" == "windows-latest" ]; then
-            @"
-            [Setup]
-            AppName=Astra Launcher
-            AppVersion=${VERSION}
-            DefaultDirName={autopf}\AstraLauncher
-            OutputDir=.
-            OutputBaseFilename=AstraLauncher-Installer-Windows-${VERSION}
-            Compression=lzma
-            SolidCompression=yes
-            [Files]
-            Source: "dist\AstraLauncher-RELEASE-Windows\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-            [Icons]
-            Name: "{autoprograms}\Astra Launcher"; Filename: "{app}\AstraLauncher-RELEASE-Windows.exe"
-            Name: "{autodesktop}\Astra Launcher"; Filename: "{app}\AstraLauncher-RELEASE-Windows.exe"
-            "@ > setup.iss
-            iscc setup.iss
-          
-          elif [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-            tar -czvf AstraLauncher-RELEASE-Linux-${VERSION}.tar.gz -C dist AstraLauncher-RELEASE-ubuntu-latest
-          fi
+          echo "BUILD_ID=${VERSION}" >> $GITHUB_ENV
+
+      - run: uv run pyinstaller --noconfirm --onedir --windowed --optimize 2 --name AstraLauncher-${{ runner.os }} --exclude-module PyQt5 --exclude-module PyQt6 --exclude-module PySide6 --exclude-module numpy --exclude-module pandas --exclude-module matplotlib --exclude-module pytest --hidden-import customtkinter --collect-all customtkinter --hidden-import ttkbootstrap_icons --collect-all ttkbootstrap_icons --hidden-import ttkbootstrap_icons_lucide --collect-all ttkbootstrap_icons_lucide --paths packages/core/src --paths packages/desktop/src packages/desktop/src/desktop/app.py
+
+      
+      - name: Compress DEV build (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          cd dist
+          zip -r -9 AstraLauncher-DEV-macOS-${{ env.BUILD_ID }}.zip AstraLauncher-macos-latest.app
+          cd ..
+
+      - name: Compress DEV build (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cd dist
+          tar -czvf AstraLauncher-DEV-Linux-${{ env.BUILD_ID }}.tar.gz AstraLauncher-ubuntu-latest
+          cd ..
+
+      - name: Compress DEV build (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path dist\AstraLauncher-windows-latest -DestinationPath dist\AstraLauncher-DEV-Windows-${env:BUILD_ID}.zip
 
       - uses: actions/upload-artifact@v4
         with:
-          name: AstraLauncher-Build-${{ runner.os }}
+          name: AstraLauncher-DEV-${{ runner.os }}-${{ env.BUILD_ID }}
           path: |
-            dist/AstraLauncher-DEV-Windows.exe
+            dist/*.zip
+            dist/*.tar.gz
+
+      - if: matrix.os == 'macos-latest'
+        run: |
+          brew install create-dmg
+          create-dmg --volname "Astra Launcher" --window-pos 200 120 --window-size 600 400 --icon-size 100 --icon "AstraLauncher-macos-latest.app" 175 120 --hide-extension "AstraLauncher-macos-latest.app" --app-drop-link 425 120 "AstraLauncher-RELEASE-macOS-${{ env.BUILD_ID }}.dmg" "dist/AstraLauncher-macos-latest.app"
+
+      - if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          choco install innosetup -y
+          @"
+          [Setup]
+          AppName=Astra Launcher
+          AppVersion=${env:BUILD_ID}
+          DefaultDirName={autopf}\AstraLauncher
+          OutputDir=.
+          OutputBaseFilename=AstraLauncher-RELEASE-Windows-${env:BUILD_ID}
+          Compression=lzma
+          SolidCompression=yes
+          [Files]
+          Source: "dist\AstraLauncher-windows-latest\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+          [Icons]
+          Name: "{autoprograms}\Astra Launcher"; Filename: "{app}\AstraLauncher-windows-latest.exe"
+          Name: "{autodesktop}\Astra Launcher"; Filename: "{app}\AstraLauncher-windows-latest.exe"
+          "@ > setup.iss
+          iscc setup.iss
+
+      - if: matrix.os == 'ubuntu-latest'
+        run: |
+          tar -czvf AstraLauncher-RELEASE-Linux-${{ env.BUILD_ID }}.tar.gz -C dist AstraLauncher-ubuntu-latest
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AstraLauncher-RELEASE-INSTALLERS-${{ runner.os }}-${{ env.BUILD_ID }}
+          path: |
             *.dmg
+            *RELEASE*.exe
             *.tar.gz
-            *.exe
