@@ -1,3 +1,4 @@
+import os
 import shlex
 import subprocess
 from pathlib import Path
@@ -18,6 +19,10 @@ def run_jar(
     if not is_proxy:
         args.append("--nogui")
 
+    creationflags = 0
+    if os.name == "nt":
+        creationflags = subprocess.CREATE_NO_WINDOW
+
     process = subprocess.Popen(
         args,
         cwd=cwd,
@@ -26,6 +31,7 @@ def run_jar(
         stdin=subprocess.PIPE,
         text=True,
         bufsize=1,
+        creationflags=creationflags,
     )
 
     print(f"[Core-util] Run jar: {' '.join(args)}")
