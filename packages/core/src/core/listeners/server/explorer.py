@@ -1,7 +1,8 @@
 import os
 from pathlib import Path
-from core.events import bus, Signal
+
 from core.components import BaseListener, listen_to
+from core.events import Signal, bus
 
 
 class ExplorerListener(BaseListener):

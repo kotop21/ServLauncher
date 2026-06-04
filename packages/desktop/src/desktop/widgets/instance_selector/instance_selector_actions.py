@@ -1,6 +1,7 @@
 import time
 import tkinter.messagebox as messagebox
-from core.events import bus, Signal
+
+from core.events import Signal, bus
 from desktop.windows.progress_window.progress_window import ProgressWindow
 
 

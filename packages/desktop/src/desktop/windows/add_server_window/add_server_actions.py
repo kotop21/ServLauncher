@@ -1,8 +1,9 @@
+import re
 import tkinter as tk
 import tkinter.messagebox as messagebox
-import re
 from typing import List
-from core.events import bus, Signal
+
+from core.events import Signal, bus
 
 
 class AddServerActions:
@@ -74,7 +75,6 @@ class AddServerActions:
             if self.view.option_core.get() != core_name:
                 return
 
-            # Вытаскиваем версию наверх
             def parse_v(v):
                 nums = [int(x) for x in re.findall(r"\d+", v)]
                 is_release = 1 if not re.search(r"[a-zA-Z]", v) else 0

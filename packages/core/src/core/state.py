@@ -1,6 +1,8 @@
 import os
+import tkinter.messagebox as messagebox
 from collections import deque
 from typing import Dict, List, Optional
+
 from core.instance_storage import InstanceStorage
 
 
@@ -30,6 +32,12 @@ class CoreState(InstanceStorage):
         prop_path = os.path.join(server_data["path"], "server.properties")
         if os.path.exists(prop_path):
             try:
+                mtime = os.path.getmtime(prop_path)
+                last_mtime = server_data.get("_last_prop_mtime", 0)
+
+                if mtime <= last_mtime:
+                    return
+
                 with open(prop_path, "r", encoding="utf-8") as f:
                     for line in f:
                         line = line.strip()
@@ -43,6 +51,7 @@ class CoreState(InstanceStorage):
                                         f"[Core] Port synced to {port} for server {server_data['id']}"
                                     )
                                     self.save()
+                                server_data["_last_prop_mtime"] = mtime
                                 break
             except Exception as e:
                 print(f"[Core] Failed to sync port for server {server_data['id']}: {e}")
@@ -54,12 +63,11 @@ class CoreState(InstanceStorage):
             save_copy.pop("status", None)
             save_copy.pop("process_key", None)
             save_copy.pop("is_imported", None)
+            save_copy.pop("_last_prop_mtime", None)
             data_to_save[k] = save_copy
         self.save_json(self.filename, data_to_save)
 
     def get_all(self) -> List[Dict]:
-        for server in self.servers.values():
-            self._sync_port(server)
         return list(self.servers.values())
 
     def get_server(self, server_id: int) -> Optional[Dict]:
@@ -72,8 +80,6 @@ class CoreState(InstanceStorage):
         if server_data.get("path"):
             for existing in self.servers.values():
                 if existing.get("path") == server_data["path"]:
-                    import tkinter.messagebox as messagebox
-
                     messagebox.showerror(
                         "Error", "This server folder is already added to the launcher!"
                     )

@@ -1,30 +1,32 @@
 import tkinter as tk
+
 import customtkinter as ctk
-from ttkbootstrap_icons_lucide import LucideIcon
+from core.app_config import config
 from desktop.components import BaseWindow, SmartButton
 from desktop.widgets.console.console_widget import ConsoleWidget
 from desktop.widgets.explorer.explorer_widget import ExplorerWidget
 from desktop.windows.server_settings.server_settings import ServerSettingsWindow
-from core.app_config import config
+from ttkbootstrap_icons_lucide import LucideIcon
+
 from .server_actions import ServerActions
 
 
 class ServerWindow(BaseWindow):
     _open_windows = {}
 
-    def __init__(self, server_data, **kwargs):
+    def __init__(self, master, server_data, **kwargs):
         server_id = server_data["id"]
 
         if server_id in ServerWindow._open_windows:
             existing_win = ServerWindow._open_windows[server_id]
             if existing_win.winfo_exists():
                 existing_win.focus_force()
-                super().__init__(title="Duplicate", size=(1, 1), **kwargs)
+                super().__init__(master, title="Duplicate", size=(1, 1), **kwargs)
                 self.withdraw()
                 self.after(0, self.destroy)
                 return
 
-        super().__init__(title=server_data["name"], size=(950, 650), **kwargs)
+        super().__init__(master, title=server_data["name"], size=(950, 650), **kwargs)
         self.server_data = server_data
         ServerWindow._open_windows[server_id] = self
 
@@ -68,7 +70,8 @@ class ServerWindow(BaseWindow):
             height=40,
             fg_color="transparent",
             hover_text="Server settings",
-            window_class=lambda parent: ServerSettingsWindow(parent, self.server_data),
+            window_class=ServerSettingsWindow,
+            window_kwargs={"server_data": self.server_data},
         )
         self.btn_settings.pack(side="right", padx=(5, 15), pady=10)
 
@@ -142,6 +145,11 @@ class ServerWindow(BaseWindow):
 
         if hasattr(self.console_widget, "btn_kill"):
             self.console_widget.btn_kill.configure(command=self.actions.action_kill)
+
+    def update_name_color(self, is_running: bool):
+        color = "#4ade80" if is_running else ("gray10", "#DCE4EE")
+        if self.lbl_name.winfo_exists():
+            self.lbl_name.configure(text_color=color)
 
     def _show_external_folders_menu(self):
         menu = tk.Menu(self, tearoff=0)

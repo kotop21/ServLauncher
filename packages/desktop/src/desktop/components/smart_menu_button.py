@@ -1,8 +1,10 @@
 import tkinter as tk
-from typing import Type, Optional, Callable, Dict
+from typing import Callable, Optional, Type
+
+from .window_opener_mixin import WindowOpenerMixin
 
 
-class SmartMenuButton:
+class SmartMenuButton(WindowOpenerMixin):
     def __init__(
         self,
         menu: tk.Menu,
@@ -13,11 +15,11 @@ class SmartMenuButton:
         get_data: Optional[Callable] = None,
         **kwargs,
     ):
+        self.init_window_manager()
         self.window_class = window_class
         self.command = command
         self.master = master
         self.get_data = get_data
-        self.opened_windows = {}
 
         menu.add_command(label=label, command=self._on_click, **kwargs)
 
@@ -25,30 +27,12 @@ class SmartMenuButton:
         data = self.get_data() if self.get_data else None
 
         if self.window_class:
-            self._open_window(data)
+            window_key = data["id"] if data and "id" in data else "default"
+            win_kwargs = {"server_data": data} if data else {}
+
+            self.open_managed_window(
+                self.window_class, self.master, window_key=window_key, **win_kwargs
+            )
+
         if self.command:
             self.command()
-
-    def _open_window(self, data: Optional[Dict]):
-        if self.window_class is None:
-            return
-
-        window_key = data["id"] if data and "id" in data else "default"
-
-        if (
-            window_key not in self.opened_windows
-            or not self.opened_windows[window_key].winfo_exists()
-        ):
-            main_app = self.master.winfo_toplevel()
-            if data:
-                self.opened_windows[window_key] = self.window_class(
-                    server_data=data, parent=main_app
-                )
-            else:
-                self.opened_windows[window_key] = self.window_class(parent=main_app)
-
-            self.opened_windows[window_key].focus()
-            print(f"[Desktop] Opened window: {self.window_class.__name__}")
-        else:
-            self.opened_windows[window_key].focus()
-            print(f"[Desktop] Focused existing window: {self.window_class.__name__}")

@@ -1,6 +1,8 @@
 import tkinter.messagebox as messagebox
+
+from core.events import Signal, bus
+
 from desktop.windows import MainWindow
-from core.events import bus, Signal
 
 
 def main():

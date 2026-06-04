@@ -1,7 +1,8 @@
 import threading
 from pathlib import Path
-from core.events import bus, Signal
+
 from core.components import BaseListener, listen_to
+from core.events import Signal, bus
 from core.state import state
 from core.utils import run_jar
 
@@ -51,7 +52,12 @@ class StartServerListener(BaseListener):
         except Exception as e:
             print(f"[Core-listener] Error cleaning lock files: {e}")
 
-        process = run_jar(str(jar_path), server.get("java_args", ""), str(server_dir))
+        process = run_jar(
+            str(jar_path),
+            server.get("java_args", ""),
+            str(server_dir),
+            server.get("core", ""),
+        )
         state.set_process(server_id, process)
 
         state.update_server_status(server_id, "Running")

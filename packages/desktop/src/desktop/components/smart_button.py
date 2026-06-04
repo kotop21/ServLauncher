@@ -1,23 +1,30 @@
+from typing import Callable, Optional, Type
+
 import customtkinter as ctk
-from typing import Type, Optional, Callable
+
+from .window_opener_mixin import WindowOpenerMixin
 
 
-class SmartButton(ctk.CTkButton):
+class SmartButton(ctk.CTkButton, WindowOpenerMixin):
     def __init__(
         self,
         master,
         status_bar=None,
         hover_text: str = "",
         window_class: Optional[Type] = None,
+        window_kwargs: Optional[dict] = None,
         command: Optional[Callable] = None,
         **kwargs,
     ):
+        self.init_window_manager()
         self.window_class = window_class
-        self.window_instance = None
+        self.window_kwargs = window_kwargs or {}
 
         def on_click():
             if self.window_class:
-                self._open_window()
+                self.open_managed_window(
+                    self.window_class, master, **self.window_kwargs
+                )
             if command:
                 command()
 
@@ -26,25 +33,3 @@ class SmartButton(ctk.CTkButton):
         if status_bar and hover_text:
             self.bind("<Enter>", lambda e: status_bar.set_status(hover_text))
             self.bind("<Leave>", lambda e: status_bar.set_status(""))
-
-    def _open_window(self):
-        if self.window_class is None:
-            return
-
-        if self.window_instance is None or not self.window_instance.winfo_exists():
-            main_app = self.winfo_toplevel()
-            self.window_instance = self.window_class(parent=main_app)
-            self.window_instance.attributes("-topmost", True)
-            self.window_instance.after(
-                100, lambda: self.window_instance.attributes("-topmost", False)
-            )
-
-            self.window_instance.focus()
-            print(f"[Desktop] Opened window: {self.window_class.__name__}")
-        else:
-            self.window_instance.attributes("-topmost", True)
-            self.window_instance.after(
-                100, lambda: self.window_instance.attributes("-topmost", False)
-            )
-            self.window_instance.focus()
-            print(f"[Desktop] Focused existing window: {self.window_class.__name__}")

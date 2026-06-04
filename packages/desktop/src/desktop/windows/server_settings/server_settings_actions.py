@@ -1,4 +1,4 @@
-from core.events import bus, Signal
+from core.events import Signal, bus
 
 
 class ServerSettingsActions:

@@ -1,16 +1,25 @@
-import warnings
 import tkinter as tk
+import warnings
+from typing import Any, Dict, List
+
 import customtkinter as ctk
-from typing import Dict, List
-from ttkbootstrap_icons_lucide import LucideIcon
+from core.events import Signal, bus
 from desktop.components import SmartMenuButton
-from core.events import bus, Signal
+from ttkbootstrap_icons_lucide import LucideIcon
+
 from .instance_selector_actions import InstanceSelectorActions
 
 warnings.filterwarnings("ignore", category=UserWarning, module="customtkinter")
 
 
-class InstanceSelector(ctk.CTkScrollableFrame):
+class ServerRowFrame(ctk.CTkFrame):
+    _server_id: str
+    _current_data: Dict[str, Any]
+    _lbl_core: ctk.CTkLabel
+    _lbl_port: ctk.CTkLabel
+
+
+class InstanceSelectorWidget(ctk.CTkScrollableFrame):
     def __init__(self, master, status_bar=None, **kwargs):
         super().__init__(master, **kwargs)
         self.status_bar = status_bar
@@ -109,13 +118,13 @@ class InstanceSelector(ctk.CTkScrollableFrame):
             self._create_row(i, instance)
 
     def _create_row(self, row_index: int, data: Dict):
-        row_frame = ctk.CTkFrame(self, fg_color=self.default_color, corner_radius=6)
+        row_frame = ServerRowFrame(self, fg_color=self.default_color, corner_radius=6)
         row_frame._server_id = data["id"]
         row_frame._current_data = data
         row_frame.grid(row=row_index, column=0, sticky="ew", pady=2, padx=4)
         row_frame.grid_columnconfigure(1, weight=1)
 
-        lbl_icon = ctk.CTkLabel(row_frame, text="", image=self.server_icon)
+        lbl_icon = ctk.CTkLabel(row_frame, text="", image=self.server_icon)  # type: ignore
         lbl_icon.grid(row=0, column=0, padx=(10, 5), pady=6)
 
         lbl_core = ctk.CTkLabel(

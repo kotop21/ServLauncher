@@ -1,6 +1,7 @@
-import urllib.request
 import json
 import ssl
+import urllib.request
+
 import certifi
 
 

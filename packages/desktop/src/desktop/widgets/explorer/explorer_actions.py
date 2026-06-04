@@ -1,5 +1,6 @@
 from pathlib import Path
-from core.events import bus, Signal
+
+from core.events import Signal, bus
 
 
 class ExplorerActions:

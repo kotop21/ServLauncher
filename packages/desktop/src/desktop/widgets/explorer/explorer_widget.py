@@ -1,7 +1,9 @@
 from pathlib import Path
+
 import customtkinter as ctk
+from core.events import Signal, bus
 from ttkbootstrap_icons_lucide import LucideIcon
-from core.events import bus, Signal
+
 from .explorer_actions import ExplorerActions
 
 
@@ -73,9 +75,17 @@ class ExplorerWidget(ctk.CTkFrame):
 
             cmd = None
             if is_dir:
-                cmd = lambda p=path: self.actions.enter_directory(p)
+
+                def dir_cmd(p=path):
+                    self.actions.enter_directory(p)
+
+                cmd = dir_cmd
             elif Path(path).suffix.lower() in self.actions.editable_extensions:
-                cmd = lambda p=path: self.actions.open_file(p)
+
+                def file_cmd(p=path):
+                    self.actions.open_file(p)
+
+                cmd = file_cmd
 
             btn = ctk.CTkButton(
                 self.scroll_frame,

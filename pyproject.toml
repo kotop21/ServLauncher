@@ -21,10 +21,25 @@ venvPath = "."
 venv = ".venv"
 
 reportMissingTypeStubs = false
-
 reportUnknownMemberType = false
 reportUnknownVariableType = false
 reportUnknownArgumentType = false
 reportAny = false
-
 reportUnusedExpression = false
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[dependency-groups]
+dev = ["pre-commit>=4.6.0", "ruff>=0.15.15"]

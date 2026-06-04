@@ -1,5 +1,5 @@
-from core.events import bus, Signal
 from core.components import BaseListener, listen_to
+from core.events import Signal, bus
 from core.state import state
 
 
@@ -32,12 +32,12 @@ class StopServerListener(BaseListener):
                     if process.stdin:
                         process.stdin.write("stop\n")
                         process.stdin.flush()
-                except:
+                except Exception:
                     process.terminate()
 
             try:
                 process.wait(timeout=3)
-            except:
+            except Exception:
                 process.kill()
 
             state.remove_process(server_id)

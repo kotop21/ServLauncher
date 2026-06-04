@@ -1,8 +1,10 @@
 import re
-import customtkinter as ctk
-from ttkbootstrap_icons_lucide import LucideIcon
-from core.events import bus, Signal
 from tkinter import messagebox
+
+import customtkinter as ctk
+from core.app_config import config
+from core.events import Signal, bus
+from ttkbootstrap_icons_lucide import LucideIcon
 
 
 class EditorWindow(ctk.CTkToplevel):
@@ -14,7 +16,13 @@ class EditorWindow(ctk.CTkToplevel):
 
         filename = path.split("/")[-1] if "/" in path else path.split("\\")[-1]
         self.title(f"Editor - {filename}")
-        self.geometry("700x500")
+
+        saved_geom = config.get(f"editor_{server_id}_geometry")
+        if saved_geom:
+            self.geometry(saved_geom)
+        else:
+            self.geometry("700x500")
+
         self.minsize(400, 300)
 
         self.transient(master)
@@ -80,6 +88,8 @@ class EditorWindow(ctk.CTkToplevel):
         bus.subscribe(Signal.RESPONSE_FILE_SAVED, self.on_file_saved)
 
     def on_close(self):
+        config.set(f"editor_{self.server_id}_geometry", self.geometry())
+
         if self.text_area.get("1.0", "end-1c") != self.initial_content:
             if messagebox.askyesno(
                 "Saving", "Do you want to save changes before exiting?"
@@ -98,7 +108,7 @@ class EditorWindow(ctk.CTkToplevel):
         self.text_area.tag_config("boolean", foreground="#D08770")
         self.text_area.tag_config("comment", foreground="#4C566A")
 
-    def highlight_syntax(self, event=None):
+    def highlight_syntax(self, _event=None):
         content = self.text_area.get("1.0", "end")
         for tag in ["string", "key", "number", "boolean", "comment"]:
             self.text_area.tag_remove(tag, "1.0", "end")
@@ -115,7 +125,7 @@ class EditorWindow(ctk.CTkToplevel):
                 end_idx = f"1.0 + {match.end(1 if tag == 'key' else 0)}c"
                 self.text_area.tag_add(tag, start_idx, end_idx)
 
-    def update_cursor_info(self, event=None):
+    def update_cursor_info(self, _event=None):
         try:
             pos = self.text_area.index("insert")
             row, col = pos.split(".")
@@ -145,17 +155,17 @@ class EditorWindow(ctk.CTkToplevel):
         self.highlight_syntax()
         self.update_cursor_info()
 
-    def on_key_release(self, event):
+    def on_key_release(self, _event):
         self.update_cursor_info()
         if self._highlight_timer:
             self.after_cancel(self._highlight_timer)
         self._highlight_timer = self.after(300, self.highlight_syntax)
 
-    def _shortcut_save(self, event=None):
+    def _shortcut_save(self, _event=None):
         self.save_file()
         return "break"
 
-    def _shortcut_undo(self, event=None):
+    def _shortcut_undo(self, _event=None):
         try:
             self.text_area._textbox.edit_undo()
             self.highlight_syntax()
@@ -164,7 +174,7 @@ class EditorWindow(ctk.CTkToplevel):
             pass
         return "break"
 
-    def _shortcut_redo(self, event=None):
+    def _shortcut_redo(self, _event=None):
         try:
             self.text_area._textbox.edit_redo()
             self.highlight_syntax()

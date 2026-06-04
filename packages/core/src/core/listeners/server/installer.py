@@ -1,8 +1,10 @@
 import threading
 from pathlib import Path
-from core.events import bus, Signal
+
 from core.components import BaseListener, listen_to
+from core.events import Signal, bus
 from core.network.papermc_api import PaperMCAPI
+from core.network.pufferfish_api import PufferfishAPI
 from core.network.purpur_api import PurpurAPI
 from core.state import state
 from core.utils import accept_eula
@@ -13,10 +15,16 @@ class InstallerListener(BaseListener):
         super().__init__()
         self.papermc = PaperMCAPI()
         self.purpur = PurpurAPI()
+        self.pufferfish = PufferfishAPI()
         self._cancel_flags = {}
 
     def _get_api(self, core_name: str):
-        return self.purpur if core_name.lower() == "purpur" else self.papermc
+        c = core_name.lower()
+        if c == "purpur":
+            return self.purpur
+        if c == "pufferfish":
+            return self.pufferfish
+        return self.papermc
 
     @listen_to(Signal.CMD_CANCEL_DOWNLOAD)
     def handle_cancel_download(self, server_id: int):

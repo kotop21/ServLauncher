@@ -1,15 +1,15 @@
+from .console import ConsoleListener
 from .delete import DeleteServerListener
+from .explorer import ExplorerListener
+from .get import GetServersListener
+from .installer import InstallerListener
+from .kill import KillServerListener
+from .server_manager import ServerManagerListener
+from .server_scanner import ServerScannerListener
 from .start import StartServerListener
 from .stop import StopServerListener
-from .kill import KillServerListener
-from .get import GetServersListener
 from .ui_updater import UIUpdaterListener
 from .update_args import UpdateArgsListener
-from .installer import InstallerListener
-from .console import ConsoleListener
-from .explorer import ExplorerListener
-from .server_scanner import ServerScannerListener
-from .server_manager import ServerManagerListener
 
 delete_server = DeleteServerListener()
 start_server = StartServerListener()

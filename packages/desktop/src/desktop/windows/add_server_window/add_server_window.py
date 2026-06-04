@@ -1,6 +1,8 @@
 import tkinter as tk
+
 import customtkinter as ctk
 from desktop.components import BaseWindow
+
 from .add_server_actions import AddServerActions
 
 
@@ -60,7 +62,14 @@ class AddServerWindow(BaseWindow):
         self.lbl_core.pack(anchor="w")
         self.option_core = ctk.CTkOptionMenu(
             self.container,
-            values=["Paper", "Purpur", "Import Local"],
+            values=[
+                "Paper",
+                "Purpur",
+                "Folia",
+                "Velocity",
+                "Pufferfish",
+                "Import Local",
+            ],
         )
         self.option_core.pack(fill="x", pady=(0, 10))
 

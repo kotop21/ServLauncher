@@ -1,7 +1,8 @@
 import customtkinter as ctk
-from desktop.widgets import StatusBar, MenuBar, InstanceSelector
-from desktop.version import __version__ as desktop_version
 from core.version import __version__ as core_version
+
+from desktop.version import __version__ as desktop_version
+from desktop.widgets import InstanceSelectorWidget, MenuBar, StatusBar
 
 
 class MainWindow(ctk.CTk):
@@ -21,7 +22,7 @@ class MainWindow(ctk.CTk):
         self.menu_bar = MenuBar(self)
         self.menu_bar.pack(side="top", fill="x")
 
-        self.instance_selector = InstanceSelector(
+        self.instance_selector = InstanceSelectorWidget(
             self, status_bar=self.status_bar, fg_color="transparent"
         )
         self.instance_selector.pack(

@@ -1,7 +1,9 @@
 import re
+
 import customtkinter as ctk
+from core.events import Signal, bus
 from ttkbootstrap_icons_lucide import LucideIcon
-from core.events import bus, Signal
+
 from .console_actions import ConsoleActions
 
 

@@ -1,7 +1,8 @@
 from pathlib import Path
-from core.events import bus, Signal
-from desktop.widgets.editor.editor_window import EditorWindow
+
 from core.app_config import config
+from core.events import Signal, bus
+from desktop.windows.editor.editor_window import EditorWindow
 
 
 class ServerActions:

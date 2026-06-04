@@ -50,8 +50,6 @@ class Signal(Enum):
 
     EVENT_DOWNLOAD_STARTED = auto()
 
-    TEST_SIGNAL = auto()
-
 
 class StrictEventBus:
     def __init__(self):

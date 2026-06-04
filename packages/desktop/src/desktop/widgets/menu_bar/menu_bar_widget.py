@@ -1,7 +1,9 @@
 import tkinter as tk
+
 import customtkinter as ctk
-from ttkbootstrap_icons_lucide import LucideIcon
 from desktop.components import SmartButton
+from ttkbootstrap_icons_lucide import LucideIcon
+
 from .menu_bar_actions import MenuBarActions
 
 

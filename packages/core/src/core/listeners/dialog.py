@@ -1,5 +1,5 @@
-from core.events import bus, Signal
 from core.components import BaseListener, listen_to
+from core.events import Signal, bus
 from core.utils.dialog_manager import DialogManager
 
 
