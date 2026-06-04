@@ -17,7 +17,10 @@ class ServerActions:
         self._explorer_visible = config.get(
             f"server_{server_id}_explorer_visible", True
         )
-        width = config.get(f"server_{server_id}_explorer_width", 250)
+        try:
+            width = int(config.get(f"server_{server_id}_explorer_width", 250))
+        except (ValueError, TypeError):
+            width = 250
 
         if not self._explorer_visible:
             self.window.explorer_widget.grid_remove()
