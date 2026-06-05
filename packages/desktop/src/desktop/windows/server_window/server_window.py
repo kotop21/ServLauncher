@@ -4,10 +4,9 @@ import tkinter as tk
 import traceback
 
 import customtkinter as ctk
-from desktop.components import BaseWindow, SmartButton
+from desktop.components import BaseWindow
 from desktop.widgets.console.console_widget import ConsoleWidget
 from desktop.widgets.explorer.explorer_widget import ExplorerWidget
-from desktop.windows.server_settings.server_settings import ServerSettingsWindow
 from ttkbootstrap_icons_lucide import LucideIcon
 
 from .server_window_actions import ServerActions
@@ -55,16 +54,14 @@ class ServerWindow(BaseWindow):
             self.buttons_frame.place(relx=1.0, rely=0.5, anchor="e", relheight=1.0)
 
             self.icon_settings = LucideIcon("settings", size=20, color="#FFFFFF").image
-            self.btn_settings = SmartButton(
+            self.btn_settings = ctk.CTkButton(
                 master=self.buttons_frame,
                 text="",
                 image=self.icon_settings,
                 width=40,
                 height=40,
                 fg_color="transparent",
-                hover_text="Server settings",
-                window_class=ServerSettingsWindow,
-                window_kwargs={"server_data": self.server_data},
+                command=self._open_settings,
             )
             self.btn_settings.pack(side="right", padx=(5, 15), pady=10)
 
@@ -209,3 +206,8 @@ class ServerWindow(BaseWindow):
             self.actions.cleanup_bus()
 
         super().destroy()
+
+    def _open_settings(self):
+        from desktop.windows.server_settings.server_settings import ServerSettingsWindow
+
+        ServerSettingsWindow(self, server_data=self.server_data)

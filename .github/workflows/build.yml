@@ -4,19 +4,70 @@ on:
   push:
     branches:
       - main
-
   pull_request:
     branches:
       - main
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+  build_windows_portable:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
 
-    runs-on: ${{ matrix.os }}
+      - uses: astral-sh/setup-uv@v5
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - run: uv sync --all-packages --no-dev
+
+      - run: uv pip install pyinstaller
+
+      - run: uv run python .github/scripts/freeze_versions.py
+
+      - name: Get Build Identifier
+        shell: bash
+        run: |
+          VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('packages/desktop/pyproject.toml', 'rb'))['project']['version'])")
+          echo "BUILD_ID=${VERSION}" >> $GITHUB_ENV
+
+      - name: Build Windows Portable
+        shell: pwsh
+        run: |
+          uv run pyinstaller `
+            --noconfirm `
+            --onefile `
+            --windowed `
+            --optimize 2 `
+            --name AstraLauncher-Windows-Portable `
+            --exclude-module PyQt5 `
+            --exclude-module PyQt6 `
+            --exclude-module PySide6 `
+            --exclude-module numpy `
+            --exclude-module pandas `
+            --exclude-module matplotlib `
+            --exclude-module pytest `
+            --hidden-import customtkinter `
+            --collect-all customtkinter `
+            --hidden-import ttkbootstrap_icons `
+            --collect-all ttkbootstrap_icons `
+            --hidden-import ttkbootstrap_icons_lucide `
+            --collect-all ttkbootstrap_icons_lucide `
+            --collect-data certifi `
+            --paths packages/core/src `
+            --paths packages/desktop/src `
+            packages/desktop/src/desktop/app.py
+
+      - name: Upload Windows Portable
+        uses: actions/upload-artifact@v4
+        with:
+          name: AstraLauncher-Windows-Portable-${{ env.BUILD_ID }}
+          path: dist/AstraLauncher-Windows-Portable.exe
+
+  build_macos:
+    needs: build_windows_portable
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -65,36 +116,7 @@ jobs:
             --paths packages/desktop/src \
             packages/desktop/src/desktop/app.py
 
-      - name: Build Windows Portable
-        if: matrix.os == 'windows-latest'
-        shell: pwsh
-        run: |
-          uv run pyinstaller `
-            --noconfirm `
-            --onefile `
-            --windowed `
-            --optimize 2 `
-            --name AstraLauncher-Windows-Portable `
-            --exclude-module PyQt5 `
-            --exclude-module PyQt6 `
-            --exclude-module PySide6 `
-            --exclude-module numpy `
-            --exclude-module pandas `
-            --exclude-module matplotlib `
-            --exclude-module pytest `
-            --hidden-import customtkinter `
-            --collect-all customtkinter `
-            --hidden-import ttkbootstrap_icons `
-            --collect-all ttkbootstrap_icons `
-            --hidden-import ttkbootstrap_icons_lucide `
-            --collect-all ttkbootstrap_icons_lucide `
-            --collect-data certifi `
-            --paths packages/core/src `
-            --paths packages/desktop/src `
-            packages/desktop/src/desktop/app.py
-
       - name: Package macOS
-        if: matrix.os == 'macos-latest'
         run: |
           brew install create-dmg
 
@@ -109,13 +131,64 @@ jobs:
             "AstraLauncher-macOS-${{ env.BUILD_ID }}.dmg" \
             "dist/AstraLauncher-macOS.app"
 
-      - name: Package Linux
-        if: matrix.os == 'ubuntu-latest'
+      - name: Upload macOS
+        uses: actions/upload-artifact@v4
+        with:
+          name: AstraLauncher-macOS-${{ env.BUILD_ID }}
+          path: "*.dmg"
+
+  build_windows_installer:
+    needs: build_macos
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - run: uv sync --all-packages --no-dev
+
+      - run: uv pip install pyinstaller
+
+      - run: uv run python .github/scripts/freeze_versions.py
+
+      - name: Get Build Identifier
+        shell: bash
         run: |
-          tar -czvf AstraLauncher-Linux-${{ env.BUILD_ID }}.tar.gz -C dist AstraLauncher-Linux
+          VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('packages/desktop/pyproject.toml', 'rb'))['project']['version'])")
+          echo "BUILD_ID=${VERSION}" >> $GITHUB_ENV
+
+      - name: Build app
+        shell: bash
+        run: |
+          uv run pyinstaller \
+            --noconfirm \
+            --onedir \
+            --windowed \
+            --optimize 2 \
+            --name AstraLauncher-${{ runner.os }} \
+            --exclude-module PyQt5 \
+            --exclude-module PyQt6 \
+            --exclude-module PySide6 \
+            --exclude-module numpy \
+            --exclude-module pandas \
+            --exclude-module matplotlib \
+            --exclude-module pytest \
+            --hidden-import customtkinter \
+            --collect-all customtkinter \
+            --hidden-import ttkbootstrap_icons \
+            --collect-all ttkbootstrap_icons \
+            --hidden-import ttkbootstrap_icons_lucide \
+            --collect-all ttkbootstrap_icons_lucide \
+            --collect-data certifi \
+            --paths packages/core/src \
+            --paths packages/desktop/src \
+            packages/desktop/src/desktop/app.py
 
       - name: Package Windows Installer
-        if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
           @"
@@ -138,30 +211,69 @@ jobs:
 
           iscc setup.iss
 
-      - name: Upload macOS
-        if: matrix.os == 'macos-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: AstraLauncher-macOS-${{ env.BUILD_ID }}
-          path: "*.dmg"
-
-      - name: Upload Linux
-        if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: AstraLauncher-Linux-${{ env.BUILD_ID }}
-          path: "*.tar.gz"
-
-      - name: Upload Windows Portable
-        if: matrix.os == 'windows-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: AstraLauncher-Windows-Portable-${{ env.BUILD_ID }}
-          path: dist/AstraLauncher-Windows-Portable.exe
-
       - name: Upload Windows Installer
-        if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
           name: AstraLauncher-Windows-Installer-${{ env.BUILD_ID }}
           path: "*Windows-Installer*.exe"
+
+  build_linux:
+    needs: build_windows_installer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - run: uv sync --all-packages --no-dev
+
+      - run: uv pip install pyinstaller
+
+      - run: uv run python .github/scripts/freeze_versions.py
+
+      - name: Get Build Identifier
+        shell: bash
+        run: |
+          VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('packages/desktop/pyproject.toml', 'rb'))['project']['version'])")
+          echo "BUILD_ID=${VERSION}" >> $GITHUB_ENV
+
+      - name: Build app
+        shell: bash
+        run: |
+          uv run pyinstaller \
+            --noconfirm \
+            --onedir \
+            --windowed \
+            --optimize 2 \
+            --name AstraLauncher-${{ runner.os }} \
+            --exclude-module PyQt5 \
+            --exclude-module PyQt6 \
+            --exclude-module PySide6 \
+            --exclude-module numpy \
+            --exclude-module pandas \
+            --exclude-module matplotlib \
+            --exclude-module pytest \
+            --hidden-import customtkinter \
+            --collect-all customtkinter \
+            --hidden-import ttkbootstrap_icons \
+            --collect-all ttkbootstrap_icons \
+            --hidden-import ttkbootstrap_icons_lucide \
+            --collect-all ttkbootstrap_icons_lucide \
+            --collect-data certifi \
+            --paths packages/core/src \
+            --paths packages/desktop/src \
+            packages/desktop/src/desktop/app.py
+
+      - name: Package Linux
+        run: |
+          tar -czvf AstraLauncher-Linux-${{ env.BUILD_ID }}.tar.gz -C dist AstraLauncher-Linux
+
+      - name: Upload Linux
+        uses: actions/upload-artifact@v4
+        with:
+          name: AstraLauncher-Linux-${{ env.BUILD_ID }}
+          path: "*.tar.gz"
