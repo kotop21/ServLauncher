@@ -1,7 +1,6 @@
 import tkinter as tk
 
 import customtkinter as ctk
-from core.app_config import config
 from desktop.components import BaseWindow, SmartButton
 from desktop.widgets.console.console_widget import ConsoleWidget
 from desktop.widgets.explorer.explorer_widget import ExplorerWidget
@@ -14,13 +13,12 @@ from .server_actions import ServerActions
 class ServerWindow(BaseWindow):
     def __init__(self, master, server_data, **kwargs):
         server_id = server_data["id"]
-        saved_geom = config.get(f"server_{server_id}_geometry")
 
         super().__init__(
             parent=master,
             title=server_data["name"],
             size=(950, 650),
-            saved_geometry=saved_geom,
+            window_key=f"server_{server_id}",
             **kwargs,
         )
 
@@ -170,14 +168,8 @@ class ServerWindow(BaseWindow):
         menu.post(x, y)
 
     def destroy(self):
-        if hasattr(self, "server_data"):
-            server_id = self.server_data["id"]
-            geom = self.geometry()
-            if geom and "+-" not in geom and "-+" not in geom:
-                config.set(f"server_{server_id}_geometry", geom)
-
-            if hasattr(self, "actions"):
-                self.actions.save_state()
-                self.actions.cleanup_bus()
+        if hasattr(self, "actions"):
+            self.actions.save_state()
+            self.actions.cleanup_bus()
 
         super().destroy()

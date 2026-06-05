@@ -2,31 +2,30 @@ import re
 from tkinter import messagebox
 
 import customtkinter as ctk
-from core.app_config import config
 from core.events import Signal, bus
+from desktop.components import BaseWindow
 from ttkbootstrap_icons_lucide import LucideIcon
 
 
-class EditorWindow(ctk.CTkToplevel):
+class EditorWindow(BaseWindow):
     def __init__(self, master, path: str, content: str, server_id: int, **kwargs):
-        super().__init__(master, **kwargs)
         self.path = path
         self.server_id = server_id
         self.initial_content = content
 
         filename = path.split("/")[-1] if "/" in path else path.split("\\")[-1]
-        self.title(f"Editor - {filename}")
 
-        saved_geom = config.get(f"editor_{server_id}_geometry")
-        if saved_geom:
-            self.geometry(saved_geom)
-        else:
-            self.geometry("700x500")
+        super().__init__(
+            parent=master,
+            title=f"Editor - {filename}",
+            size=(700, 500),
+            window_key=f"editor_{server_id}",
+            resizable=(True, True),
+            **kwargs,
+        )
 
         self.minsize(400, 300)
-
         self.transient(master)
-        self.protocol("WM_DELETE_WINDOW", self.on_close)
 
         self.top_bar = ctk.CTkFrame(self, height=40, fg_color="transparent")
         self.top_bar.pack(fill="x", padx=10, pady=(10, 5))
@@ -88,8 +87,6 @@ class EditorWindow(ctk.CTkToplevel):
         bus.subscribe(Signal.RESPONSE_FILE_SAVED, self.on_file_saved)
 
     def on_close(self):
-        config.set(f"editor_{self.server_id}_geometry", self.geometry())
-
         if self.text_area.get("1.0", "end-1c") != self.initial_content:
             if messagebox.askyesno(
                 "Saving", "Do you want to save changes before exiting?"

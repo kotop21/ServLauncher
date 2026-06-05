@@ -18,7 +18,8 @@ class ServerActions:
             f"server_{server_id}_explorer_visible", True
         )
         try:
-            width = int(config.get(f"server_{server_id}_explorer_width", 250))
+            raw_width = config.get(f"server_{server_id}_explorer_width", 250)
+            width = int(raw_width) if raw_width is not None else 250
         except (ValueError, TypeError):
             width = 250
 
@@ -66,7 +67,13 @@ class ServerActions:
             self.window.splitter.grid()
             self.window.explorer_widget.grid()
             server_id = self.window.server_data["id"]
-            width = config.get(f"server_{server_id}_explorer_width", 250)
+
+            try:
+                raw_width = config.get(f"server_{server_id}_explorer_width", 250)
+                width = int(raw_width) if raw_width is not None else 250
+            except (ValueError, TypeError):
+                width = 250
+
             self.window.middle_frame.grid_columnconfigure(2, minsize=width)
             self.window.explorer_widget.configure(width=width)
             self._explorer_visible = True

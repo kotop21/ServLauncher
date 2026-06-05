@@ -1,21 +1,21 @@
 import customtkinter as ctk
+from desktop.components import BaseWindow
 
 
-class ProgressWindow(ctk.CTkToplevel):
+class ProgressWindow(BaseWindow):
     def __init__(
         self, master, title="Progress", text="Please wait...", on_cancel=None, **kwargs
     ):
-        super().__init__(master, **kwargs)
-        self.title(title)
-        self.geometry("450x160")
-        self.minsize(400, 160)
+        super().__init__(
+            parent=master,
+            title=title,
+            size=(450, 160),
+            window_key=None,
+            resizable=(False, False),
+            **kwargs,
+        )
+
         self.transient(master)
-
-        self.update_idletasks()
-        x = master.winfo_rootx() + (master.winfo_width() // 2) - (450 // 2)
-        y = master.winfo_rooty() + (master.winfo_height() // 2) - (160 // 2)
-        self.geometry(f"+{x}+{y}")
-
         self.grab_set()
 
         self.on_cancel_callback = on_cancel

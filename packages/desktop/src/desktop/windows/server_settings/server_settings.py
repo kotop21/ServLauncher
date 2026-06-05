@@ -1,17 +1,21 @@
 import customtkinter as ctk
+from desktop.components import BaseWindow
 
 from .server_settings_actions import ServerSettingsActions
 
 
-class ServerSettingsWindow(ctk.CTkToplevel):
+class ServerSettingsWindow(BaseWindow):
     def __init__(self, parent, server_data, **kwargs):
-        super().__init__(parent, **kwargs)
+        super().__init__(
+            parent=parent,
+            title=f"Settings - {server_data['name']}",
+            size=(450, 250),
+            window_key="server_settings_window",
+            resizable=(False, False),
+            **kwargs,
+        )
         self.server_data = server_data
         self.actions = ServerSettingsActions(self)
-
-        self.title(f"Settings - {server_data['name']}")
-        self.geometry("450x250")
-        self.resizable(False, False)
 
         self.transient(parent)
         self.grab_set()
