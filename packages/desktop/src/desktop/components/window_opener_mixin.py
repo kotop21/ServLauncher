@@ -60,10 +60,16 @@ class WindowOpenerMixin:
                 pass
 
         try:
+            if win.winfo_exists():
+                win.deiconify()
+                win.lift()
             win.attributes("-topmost", True)
             win.after(100, safe_topmost)
         except Exception:
             pass
 
-        win.focus()
+        try:
+            win.focus()
+        except Exception:
+            pass
         return win
