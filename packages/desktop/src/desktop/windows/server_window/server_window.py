@@ -190,6 +190,9 @@ class ServerWindow(BaseWindow):
         logging.info(
             f"ServerWindow destroy called for server {getattr(self, 'server_data', {}).get('id', None)}"
         )
+        logging.debug(
+            "ServerWindow.destroy stack:\n" + "".join(traceback.format_stack())
+        )
         if hasattr(self, "actions"):
             self.actions.save_state()
             self.actions.cleanup_bus()

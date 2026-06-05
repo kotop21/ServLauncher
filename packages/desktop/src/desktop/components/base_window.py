@@ -1,3 +1,6 @@
+import logging
+import traceback
+
 import customtkinter as ctk
 
 
@@ -34,4 +37,8 @@ class BaseWindow(ctk.CTkToplevel):
         self.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def on_close(self):
+        logging.info(f"BaseWindow.on_close called for {self.__class__.__name__}")
+        logging.debug(
+            "BaseWindow.on_close stack:\n" + "".join(traceback.format_stack())
+        )
         self.destroy()
