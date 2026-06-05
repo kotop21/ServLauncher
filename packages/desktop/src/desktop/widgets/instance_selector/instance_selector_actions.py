@@ -20,7 +20,7 @@ class InstanceSelectorActions(WindowOpenerMixin):
             self.open_server_window(self.widget._current_context_data)
 
     def on_double_click(self, data):
-        self.open_server_window(data)
+        self.widget.after(50, lambda d=data: self.open_server_window(d))
 
     def open_server_window(self, data):
         server_id = data.get("id")
