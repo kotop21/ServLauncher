@@ -22,6 +22,11 @@ class ServerWindow(BaseWindow):
             **kwargs,
         )
 
+        try:
+            self.transient(None)
+        except Exception:
+            pass
+
         self.server_data = server_data
 
         try:
