@@ -89,7 +89,7 @@ wheels = [
 
 [[package]]
 name = "desktop"
-version = "0.0.3"
+version = "0.0.4"
 source = { editable = "packages/desktop" }
 dependencies = [
     { name = "core" },

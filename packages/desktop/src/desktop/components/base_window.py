@@ -8,6 +8,7 @@ class BaseWindow(ctk.CTkToplevel):
         title="Launcher",
         size=(800, 600),
         resizable=(False, False),
+        window_key=None,
         **kwargs,
     ):
         root_master = parent.winfo_toplevel() if parent else None

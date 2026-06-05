@@ -11,6 +11,7 @@ class ServerActions:
         self._drag_start_x = 0
         self._start_explorer_width = 0
         self._explorer_visible = True
+        self._open_editors = []
 
     def apply_saved_state(self):
         server_id = self.window.server_data["id"]
@@ -50,12 +51,14 @@ class ServerActions:
             bus.unsubscribe(Signal.RESPONSE_FILE_CONTENT, self.on_file_content_received)
         except Exception:
             pass
+        self._open_editors.clear()
 
     def on_file_content_received(
         self, path: str, content: str, server_id: int, success: bool
     ):
         if server_id == self.window.server_data["id"] and success:
-            EditorWindow(self.window, path, content, server_id)
+            editor = EditorWindow(self.window, path, content, server_id)
+            self._open_editors.append(editor)
 
     def toggle_explorer(self):
         if self._explorer_visible:
