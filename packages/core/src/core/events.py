@@ -28,10 +28,13 @@ class Signal(Enum):
     CMD_REMOVE_SERVER = auto()
     CMD_CANCEL_DOWNLOAD = auto()
     CMD_CHECK_ACTIVE_SERVERS = auto()
+    CMD_CHECK_JAVA = auto()
 
     EVENT_DOWNLOAD_PROGRESS = auto()
     EVENT_DOWNLOAD_COMPLETE = auto()
     EVENT_DOWNLOAD_ERROR = auto()
+    EVENT_JAVA_FOUND = auto()
+    EVENT_JAVA_NOT_FOUND = auto()
 
     SERVER_ADDED = auto()
     SERVER_DELETED = auto()

@@ -18,6 +18,7 @@ class EditorWindow(BaseWindow):
         super().__init__(
             parent=master,
             title=f"Editor - {filename}",
+            transient_to_parent=False,
             size=(700, 500),
             resizable=(True, True),
             **kwargs,

@@ -46,6 +46,9 @@ class InstanceSelectorWidget(ctk.CTkScrollableFrame):
 
         self.load_instances()
 
+        bus.subscribe(Signal.EVENT_JAVA_FOUND, self.actions.on_java_found)
+        bus.subscribe(Signal.EVENT_JAVA_NOT_FOUND, self.actions.on_java_not_found)
+
     def destroy(self):
         try:
             bus.unsubscribe(Signal.RESPONSE_ALL_SERVERS, self._on_servers_received)
@@ -60,6 +63,8 @@ class InstanceSelectorWidget(ctk.CTkScrollableFrame):
             bus.unsubscribe(
                 Signal.EVENT_DOWNLOAD_PROGRESS, self.actions.on_download_progress
             )
+            bus.unsubscribe(Signal.EVENT_JAVA_FOUND, self.actions.on_java_found)
+            bus.unsubscribe(Signal.EVENT_JAVA_NOT_FOUND, self.actions.on_java_not_found)
         except Exception:
             pass
         super().destroy()

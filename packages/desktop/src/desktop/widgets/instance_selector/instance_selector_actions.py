@@ -20,7 +20,19 @@ class InstanceSelectorActions(WindowOpenerMixin):
             self.open_server_window(self.widget._current_context_data)
 
     def on_double_click(self, data):
-        self.widget.after(50, lambda d=data: self.open_server_window(d))
+        bus.emit(Signal.CMD_CHECK_JAVA, server_data=data)
+
+    def on_java_found(self, server_data):
+        self.widget.after(50, lambda d=server_data: self.open_server_window(d))
+
+    def on_java_not_found(self):
+        self.widget.after(
+            0,
+            lambda: messagebox.showerror(
+                "Java Not Found",
+                "Java is not installed or not found on your system. Please install Java to continue.",
+            ),
+        )
 
     def open_server_window(self, data):
         server_id = data.get("id")
@@ -28,12 +40,12 @@ class InstanceSelectorActions(WindowOpenerMixin):
         last_open = self._last_open_time.get(server_id, 0)
         if now - last_open < 0.35:
             logging.info(
-                f"InstanceSelectorActions: ignored rapid re-open for server_id={server_id}"
+                f"[Desktop] InstanceSelectorActions: ignored rapid re-open for server_id={server_id}"
             )
             return
 
         logging.info(
-            f"InstanceSelectorActions: opening ServerWindow for server_id={server_id}"
+            f"[Desktop] InstanceSelectorActions: opening ServerWindow for server_id={server_id}"
         )
         self._last_open_time[server_id] = now
 

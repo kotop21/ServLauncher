@@ -34,7 +34,7 @@ class BaseWindow(ctk.CTkToplevel):
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
         logging.info(
-            f"BaseWindow protocol WM_DELETE_WINDOW registered for {self.__class__.__name__}"
+            f"[Desktop] BaseWindow protocol WM_DELETE_WINDOW registered for {self.__class__.__name__}"
         )
 
         self.deiconify()

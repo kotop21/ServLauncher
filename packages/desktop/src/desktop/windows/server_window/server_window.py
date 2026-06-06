@@ -14,11 +14,14 @@ from .server_window_actions import ServerActions
 
 class ServerWindow(BaseWindow):
     def __init__(self, master, server_data, **kwargs):
-        logging.info(f"ServerWindow init start for server {server_data.get('id')}")
+        logging.info(
+            f"[Desktop] ServerWindow init start for server {server_data.get('id')}"
+        )
         super().__init__(
             parent=master,
-            title=server_data["name"],
+            title=f"Server - {server_data['name']}",
             resizable=(True, True),
+            transient_to_parent=False,
             size=(950, 650),
             **kwargs,
         )
@@ -138,9 +141,6 @@ class ServerWindow(BaseWindow):
             if hasattr(self.console_widget, "btn_kill"):
                 self.console_widget.btn_kill.configure(command=self.actions.action_kill)
 
-            logging.info(
-                f"ServerWindow init complete for server {self.server_data.get('id')}"
-            )
             self._close_guard = time.time() + 1.0
         except Exception as e:
             logging.error(
