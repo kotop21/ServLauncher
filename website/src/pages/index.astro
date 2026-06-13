@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 
 <Layout title="Home - Astra Launcher">
@@ -7,7 +8,7 @@ import Layout from '../layouts/Layout.astro';
     
     <div class="main-content">
       <h1 class="general-title">Hello, Astra Launcher</h1>
-      <p class="subtitle">A lightweight, lightning-fast open-source workspace tailored for modern Minecraft servers.</p>
+      <p class="subtitle">A lightweight, lightning-fast <b>open-source</b> workspace tailored for modern Minecraft servers.</p>
 
       <div class="hero-buttons">
         <a href="https://github.com/kotop21/AstraLauncher/releases/latest"><button>Download</button></a>
@@ -15,27 +16,55 @@ import Layout from '../layouts/Layout.astro';
       </div>
     </div>
 
-    <img src={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/preview.png`} alt="Astra Launcher Preview" loading="eager" />
+    <img src={`${baseUrl}/preview.png`} alt="Astra Launcher Preview" loading="eager" class="hero-img" draggable="false" />
 
-    <h1 class="title">Features</h1>
+    <div class="scroll-hint-wrapper">
+      <a href="#" class="scroll-hint" onclick="event.preventDefault(); window.scrollTo({ top: window.innerHeight + 70, behavior: 'smooth' });">Explore Features ↓</a>
+    </div>
 
-    <ul>
-      <li>
-        <strong>Lightning-Fast Interface</strong> — The control panel opens instantly and runs with zero lag, keeping the system lightweight and responsive.
-      </li>
-      <li>
-        <strong>Centralized Management</strong> — All your servers are gathered in one place. Switch between consoles, files, and instance logs in a single click.
-      </li>
-      <li>
-        <strong>Built-in Editor</strong> — Modify configurations and tweak server files directly inside the launcher without relying on third-party text editors.
-      </li>
-      <li>
-        <strong>Instant Core Switching</strong> — Automatically download popular server jars (Paper, Purpur) straight from the dashboard or instantly drop in your own local .jar.
-      </li>
-      <li>
-        <strong>Monorepo Ready</strong> — Perfectly tailored for local development and testing entire networks of multiple servers simultaneously.
-      </li>
-    </ul>
+    <div class="features-container">
+
+      <section class="feature-item">
+        <div class="feature-text">
+          <h3>All-in-One Server Workspace</h3>
+          <p>Track live console logs, send commands, and navigate server files simultaneously. Customize your workspace on the fly — resize the file manager sidebar or hide it completely to focus on the console. Your custom layout width and state are automatically preserved, even after restarting.</p>
+        </div>
+        <div class="feature-visual">
+          <img src={`${baseUrl}/server-control.png`} alt="Server Control Panel Screenshot" draggable="false" />
+        </div>
+      </section>
+      
+      <section class="feature-item reverse">
+        <div class="feature-text">
+          <h3>Centralized Management</h3>
+          <p>All your servers are gathered in one place. Switch between consoles, files, and instance logs in a single click.</p>
+        </div>
+        <div class="feature-visual">
+          <img src={`${baseUrl}/preview.png`} alt="Centralized Management Screenshot" />
+        </div>
+      </section>
+
+      <section class="feature-item">
+        <div class="feature-text">
+          <h3>Built-in Editor & File Browser</h3>
+          <p>Navigate server directories using the built-in sidebar manager and launch the code editor instantly.</p>
+        </div>
+        <div class="feature-visual">
+          <img src={`${baseUrl}/editor.png`} alt="Built-in Editor Screenshot" draggable="false" />
+        </div>
+      </section>
+
+      <section class="feature-item reverse">
+        <div class="feature-text">
+          <h3>Instant Core Switching</h3>
+          <p>Automatically download popular server jars (Paper, Purpur, Velocity, etc.) straight from the dashboard or instantly drop in your own local .jar.</p>
+        </div>
+        <div class="feature-visual">
+          <img src={`${baseUrl}/core-switching.png`} alt="Core Switching Screenshot" draggable="false" />
+        </div>
+      </section>
+
+    </div>
 
     <footer>
       <p>Tailored for server admins by <strong>kotop21</strong></p>
@@ -45,14 +74,13 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <style>
+  :global(html) {
+    scroll-behavior: smooth;
+  }
+
   hr {
     margin-top: 30px;
     margin-bottom: 30px;
-  }
-
-  li {
-    margin-top: 5px;
-    margin-bottom: 5px;
   }
 
   footer {
@@ -99,10 +127,6 @@ import Layout from '../layouts/Layout.astro';
       0 0 24px rgba(255,255,255,0.08),
       0 0 60px rgba(96,165,250,0.08);
   }
-  .title {
-    font-size: 45px;
-    text-decoration: underline;
-  }
 
   .subtitle {
     color: lightgray;
@@ -110,18 +134,107 @@ import Layout from '../layouts/Layout.astro';
   }
   
   .container {
-    max-width: 46%;
+    width: 100%;
+    max-width: 1000px;
     padding-top: 15vh;
     margin: 0 auto;
   }
 
-  img {
+  .hero-img {
     display: block;
+    width: 100% !important;
+    max-width: 65% !important;
+    height: auto;
+    margin: 0 auto;
+  }
+
+  .scroll-hint-wrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: -10px;
+    margin-bottom: 110px; 
+    position: relative;
+    z-index: 99999; 
+  }
+
+  .scroll-hint {
+    color: #666 !important; 
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    
+    padding: 15px 30px; 
+    margin: -15px -30px;
+    display: inline-block;
+    cursor: pointer;
+  }
+
+  .scroll-hint:hover {
+    color: #999 !important;
+  }
+
+  img, video {
+    display: block;
+    width: 100% !important;
     max-width: 100%;
     height: auto;
+    user-select: none;
+    -webkit-user-drag: none;
     filter: 
       drop-shadow(0 20px 50px rgba(255, 255, 255, 0.08))
       drop-shadow(0 -15px 40px rgba(255, 255, 255, 0.05));
+  }
+
+  .features-container {
+    display: flex;
+    flex-direction: column;
+    gap: 80px;
+    width: 100%;
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 50px;
+    width: 100%;
+  }
+
+  .feature-item.reverse {
+    flex-direction: row-reverse;
+  }
+
+  .feature-text {
+    width: 40%;
+  }
+
+  .feature-text h3 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+
+  .feature-text p {
+    color: lightgray;
+    font-size: 18px;
+    margin: 0;
+  }
+
+  .feature-visual {
+    width: 60%;
+    display: flex;
+    justify-content: center;
+  }
+
+  @media (max-width: 1024px) {
+    .container {
+      max-width: 90%;
+    }
+    .hero-img {
+      max-width: 100% !important;
+    }
   }
 
   @media (max-width: 768px) {
@@ -133,10 +246,6 @@ import Layout from '../layouts/Layout.astro';
     .general-title {
       font-size: 36px;
       letter-spacing: -1px;
-    }
-
-    .title {
-      font-size: 28px;
     }
 
     .subtitle {
@@ -160,8 +269,24 @@ import Layout from '../layouts/Layout.astro';
       padding: 14px 24px;
     }
 
-    ul {
-      padding-left: 20px;
+    .feature-item, 
+    .feature-item.reverse {
+      flex-direction: column;
+      gap: 20px;
+      text-align: center;
+    }
+
+    .feature-text,
+    .feature-visual {
+      width: 100%;
+    }
+
+    .features-container {
+      gap: 60px;
+    }
+
+    .scroll-hint-wrapper {
+      display: none;
     }
   }
 </style>
